@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+#
+# Synchronize the podcasts on my
+# Samsung phone
+#
+#######################################
+
+
+# Configurations
+DEBUG="YES"
+PHONE_DIR="${HOME}/phone-tmp"
+#PHONE_PODCAST_DIR="${PHONE_DIR}/Podcasts"
+PHONE_PODCAST_DIR="${PHONE_DIR}"
+SOURCE_DIR="/data/podcasts/sync"
+SOURCE_SYNC_FILE="${SOURCE_DIR}/.device_sync"
+
+
+# Make sure we clean up our mounts on exit
+function clean_up_mounts {
+	fusermount -uz "$PHONE_DIR"
+	rmdir "$PHONE_DIR"
+}
+
+trap clean_up_mounts EXIT
+
+
+# Mount the MTP device in a temporary directory
+mkdir -p "$PHONE_DIR"
+sshfs phone: "$PHONE_DIR"
+
+# Check to make sure that the phone was mounted properly
+if [ -z "ls -A ${PHONE_DIR}" ] || [ ! -d "$PHONE_PODCAST_DIR" ]; then
+	rmdir "$PHONE_DIR"
+	echo "Could not mount the phone; make sure the FTP server is active."
+	exit 1
+fi
+
+if [ ! -d "$SOURCE_DIR" ]; then
+	echo "Source podcast directory does not seem to be present"
+	exit 2
+fi
+
+# If the "last synchronized" file exists, utilize it to delete old episodes
+if [ -e "$SOURCE_SYNC_FILE" ]; then
+	
+	# For each file present before last sync, check to see if it was deleted on
+	# the device - and then delete it from the source as well
+	while read EPISODE; do
+		if [ ! -e "${PHONE_PODCAST_DIR}/$( basename $EPISODE )" ]; then
+
+			if [ -n "$DEBUG" ]; then 
+				echo "Cannot find episode $( basename $EPISODE ) on the phone,"
+				echo "so attempting to delete it in 3 seconds..."
+				sleep 3s
+			fi
+
+			rm "$EPISODE"
+		fi
+	done < <( find "${SOURCE_DIR}/"* ! -cnewer "$SOURCE_SYNC_FILE" \
+		! -name "$( basename $SOURCE_SYNC_FILE )" )
+
+	# Check to see if there are episodes on the device that aren't present
+	# in the sync dir, and delete those too (since we're not using rsync)
+	while read EPISODE; do
+		if [ ! -e "${SOURCE_DIR}/$( basename $EPISODE )" ]; then
+
+			if [ -n "$DEBUG" ]; then 
+				echo "Cannot find episode ${EPISODE} in the source directory,"
+				echo "so attempting to delete it in 3 seconds..."
+				sleep 3s
+			fi
+
+			rm "$EPISODE"
+		fi
+	done < <( find "${PHONE_PODCAST_DIR}/"* ! -name "$( basename $SOURCE_SYNC_FILE )" )
+	
+else
+	[ -n "$DEBUG" ] && echo "No previous sync file; assuming we're starting from scratch"
+	touch --date="1999-12-31 23:59:59" "$SOURCE_SYNC_FILE"
+fi
+
+# Copy the new podcasts
+while read EPISODE; do
+	[ -n "$DEBUG" ] && echo "Copying new episode: $( basename $EPISODE )"
+	cp -n "$EPISODE" "${PHONE_PODCAST_DIR}/"
+done < <( find "$SOURCE_DIR/"* -cnewer "$SOURCE_SYNC_FILE" ! -name "$( basename $SOURCE_SYNC_FILE )" )
+
+# Update the sync'd file, unmount the phone, and delete the temp directory
+[ -n "$DEBUG" ] && echo "Updating sync file, unmounting & removing temp directory"
+touch "$SOURCE_SYNC_FILE" 
+
