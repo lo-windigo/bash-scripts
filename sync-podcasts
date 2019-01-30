@@ -26,7 +26,10 @@ trap clean_up_mounts EXIT
 
 # Mount the MTP device in a temporary directory
 mkdir -p "$PHONE_DIR"
-sshfs phone: "$PHONE_DIR"
+if ! sshfs phone: "$PHONE_DIR"; then
+	echo "SSH command failed; please check the connection to the phone."
+	exit 10
+fi
 
 # Check to make sure that the phone was mounted properly
 if [ -z "ls -A ${PHONE_DIR}" ] || [ ! -d "$PHONE_PODCAST_DIR" ]; then
