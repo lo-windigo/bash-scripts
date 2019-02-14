@@ -11,6 +11,7 @@
 
 # Debug if anything other than empty
 DEBUG=1
+EXCLUDE=( 'cache/**' '__pycache__/**' '*.pyc' 'abcde.*' )
 
 if [ ! $# -eq 2 ] && [ ! $# -eq 3 ]; then
 	cat <<-USAGE
@@ -49,9 +50,17 @@ if [ $# -eq 3 ]; then
 	LINK_DEST="--link-dest=${ARGS[-3]}"
 fi
 
+# Ignore a few patterns
+IGNORE=
+if [ ! -z "$EXCLUDE" ]; then
+	for PATTERN in "${EXCLUDE[@]}"; do
+		IGNORE+="--exclude='${PATTERN}' "
+	done
+fi
+
 # Provide a way to provide an ignore file
 if [ -f "${ARGS[-2]}ignore.txt" ]; then
-	IGNORE="--exclude-from=${ARGS[-2]}ignore.txt"
+	IGNORE+="--exclude-from=${ARGS[-2]}ignore.txt"
 fi
 
 
