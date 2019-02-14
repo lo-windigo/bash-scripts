@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Make sure there's a file to convert.
+if [ $# -ne 1 ]; then
+    echo "Usage ${0##*/} file/to/convert.ext"
+    exit 0
+fi
+
+continue="y"
+artist="$(echo "${1##*/}" | sed 's/\(.*\) - \(.*\)/\1/')"
+title="$(echo "${1%.*}" | sed 's/\(.*\) - \(.*\)/\2/')"
+while [ "$continue" != "n" ]; do
+    echo "Current tags are: "
+    if [ -n "$artist" ]; then
+        echo "ARTIST=$artist"
+    fi
+    if [ -n "$album" ]; then
+        echo "ALBUM=$album"
+    fi
+    if [ -n "$date" ]; then
+        echo "DATE=$date"
+    fi
+    if [ -n "$trackNumber" ]; then
+        echo "TRACKNUMBER=$trackNumber"
+    fi
+    if [ -n "$title" ]; then
+        echo "TITLE=$title"
+    fi
+    if [ -n "$genre" ]; then
+        echo "GENRE=$genre"
+    fi
+    read -n1 -p "Edit tags? " continue
+    continue="${continue,,}"
+    if [ "$continue" = "y" ]; then
+        if [ -n "$artist" ]; then
+            read -e -i "$artist" artist
+        else
+            read -p "ARTIST=" -e artist
+        fi
+        if [ -n "$album" ]; then
+            read -e -i "$album" album
+        else
+            read -p "ALBUM=" -e album
+        fi
+        if [ -n "$date" ]; then
+            read -e -i "$date" date
+        else
+            read -p "DATE=" -e date
+        fi
+        if [ -n "$trackNumber" ]; then
+            read -e -i "$trackNumber" trackNumber
+        else
+            read -p "TRACKNUMBER=" -e trackNumber
+        fi
+        if [ -n "$title" ]; then
+            read -e -i "$title" title
+        else
+            read -p "TITLE=" -e title
+        fi
+        if [ -n "$genre" ]; then
+            read -e -i "$genre" genre
+        else
+            read -p "GENRE=" -e genre
+        fi
+    fi
+done
+    if [ -n "$trackNumber" ]; then
+        if [ ${#trackNumber} -eq 1 ]; then
+            trackNumber="0$trackNumber"
+        fi
+    outFile="$trackNumber - $title.opus"
+else
+    outFile="$artist - $title.opus"
+fi
+ffmpeg -i "$1" -map_metadata -1 -acodec libopus -b:a 64k -vbr on -compression_level 10 -vn -metadata ARTIST="$artist" -metadata ALBUM="$album" -metadata DATE="$date" -metadata TRACKNUMBER="$trackNumber" -metadata TITLE="$title" -metadata GENRE="$genre" "$outFile" && rm -vi "$1"
+exit 0

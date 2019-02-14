@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+##
+## Get some fishing done, while you're getting other things done
+##
+
+echo 'Please select the Minecraft window...'
+MC_WINDOW_ID=$( xdotool selectwindow getactivewindow )
+echo "$MC_WINDOW_ID"
+sleep 1s
+
+clear
+
+cat <<'MINE'
+ ___ ___  ____  ____     ___      _____   ___   ____  
+ |   T   Tl    j|    \   /  _]    |     | /   \ |    \ 
+ | _   _ | |  T |  _  Y /  [_     |   __jY     Y|  D  )
+ |  \_/  | |  | |  |  |Y    _]    |  l_  |  O  ||    / 
+ |   |   | |  | |  |  ||   [_     |   _] |     ||    \ 
+ |   |   | j  l |  |  ||     T    |  T   l     !|  .  Y
+ l___j___j|____jl__j__jl_____j    l__j    \___/ l__j\_j
+                                                       
+               _____  ____  _____ __ __ 
+               |     |l    j/ ___/|  T  T
+               |   __j |  T(   \_ |  l  |
+               |  l_   |  | \__  T|  _  |
+               |   _]  |  | /  \ ||  |  |
+               |  T    j  l \    ||  |  |
+               l__j   |____j \___jl__j__j
+
+ Fishing... [type any character to stop]
+MINE
+
+# Break out of chat/inventory, whatever you left the screen on
+sleep 1s
+xdotool windowactivate $MC_WINDOW_ID key Escape mousedown 3
+
+# Until a key is pressed, right-click four times a second
+read -s EXIT
+
+#xdotool mouseup --window $MC_WINDOW_ID 3
+xdotool windowactivate $MC_WINDOW_ID mouseup --window $MC_WINDOW_ID 3
+
+echo "Done mining for today."
+

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+##
+## Windigo's MOTD script
+##
+## Create a custom MOTD for this server
+##
+
+
+MOTD=/etc/motd
+#MOTD=/home/windigo/motd
+
+# Check to make sure we can write to the MOTD file
+if [ ! -w "$MOTD" ]; then
+
+	if [ -e "$MOTD" ]; then
+		echo 'Cannot write to MOTD file!'
+		exit 1
+	elif [ ! touch "$MOTD" ]; then
+		echo 'Cannot create the MOTD file!'
+		exit 2
+	fi
+fi
+
+# Print a horizontal separator
+function hr {
+	echo -n '┣' >> "$MOTD"
+	for I in $( seq 1 1 25 ); do
+		echo -n '┳┻' >> "$MOTD"
+	done
+	echo -n '┫' >> "$MOTD"
+
+	echo -e "\n\n" >> "$MOTD"
+}
+
+# Write the MOTD, with whatever message/output you would like
+cat > "$MOTD" <<FDLOGO
+
+  ┏━╸┏━┓┏━┓┏━╸╺┳┓┏━╸╻ ╻
+  ┣╸ ┣┳┛┣━┫┃╺┓ ┃┃┣╸ ┃┏┛ 
+  ╹  ╹┗╸╹ ╹┗━┛╺┻┛┗━╸┗┛ 
+
+FDLOGO
+
+WELCOME=" Welcome to $( hostname ) - a FragDev.net server"
+echo "$WELCOME" >> "$MOTD"
+echo >> "$MOTD"
+
+hr
+
+
