@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+#
+# Control audio playback
+#
+#######################################
+
+
+function init {
+
+	# Set up script variables
+	load_variables
+
+	# Sanity check
+	if [ -z "${PLAYER_DIR}" ]; then
+		echo 'Failed to initialize variables'
+		exit 10
+	fi
+
+	#find "${PLAYER_DIR}/"*
+
+	# Load any supported players
+	#find "${PLAYER_DIR}/"* -type f | sort -r | while read PLAYER; do
+	for PLAYER in "${PLAYER_DIR}/"*; do
+
+		PLAYER_NAME="$( basename $PLAYER )" 
+		PLAYER_SCRIPT="${PLAYER_DIR}/${PLAYER_NAME}"
+
+		#echo "${PLAYER_NAME}"
+		#echo "${PLAYER_SCRIPT}"
+
+		if source "${PLAYER_SCRIPT}"; then
+			PLAYERS+=( "${PLAYER_NAME}" )
+		fi
+
+	done
+
+	echo "${PLAYERS[@]}"
+
+	# Run the actions
+	#action $@
+}
+
+
+function load_variables {
+
+	if [ -z "$XDG_RUNTIME_DIR" ]; then
+		echo "No XDG_RUNTIME_DIR set!"
+		exit 2
+	fi
+
+	AUDIO_STATUS_FILE="${XDG_RUNTIME_DIR}/audio_status"
+	PLAYER_DIR="${HOME}/bin/audio_players"
+	PLAYERS=()
+}
+
+
+function save_variables {
+	
+	cat <<- VARIABLES > $AUDIO_STATUS_FILE
+		LAST_ACTION=""
+		LAST_PLAYER="${LAST_PLAYER}"
+	VARIABLES
+}
+
+
+function action {
+
+	if [ $# -gt 1 ]; then
+		echo "Wrong number of args/switches: only use one!"
+		exit 10
+	fi
+
+	if [ $# -lt 1 ]; then
+		echo "Wrong number of args/switches: We need at least one"
+		exit 11
+	fi
+
+	case "$1" in
+		--play|-p)
+			
+			;;
+		--pause|-x)
+			
+			;;
+		--stop|-s)
+			echo "NOT IMPLEMENTED!"
+			;;
+		--next|-n)
+			
+			;;
+		*)
+			echo "Unrecognized switch: $1"
+			exit 12 
+			;;
+	esac
+}
+
+# Kick things off - run the script
+init $@

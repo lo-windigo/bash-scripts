@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+## Audacious interface for audio control scripts
+
+# Do not define any of these functions if audacious is not installed
+if [ -z "$( which audtool )" ] || [ -z "$1" ]; then
+	exit 1
+fi
+
+# Set some values to find the X11 display
+DISPLAY=':0'
+
+case "$1" in
+	pause)
+		audtool --playback-playpause
+		;;
+	next)
+		audtool --playlist-advance
+		;;
+	prev)
+		audtool --playlist-reverse
+		;;
+esac
+
+
+
+# Check run status
+function audacious_running {
+
+	audtool --current-song > /dev/null
+	return $?
+}
+
+
+# Move to previous item in the playlist
+function audacious_prev {
+	audtool --playlist-reverse > /dev/null
+}
+
+
+# Move to next item in the playlist
+function audacious_next {
+	audtool --playlist-advance > /dev/null
+}
+
+
+# Begin-resume playback
+function audacious_play {
+	audtool --playback-play > /dev/null
+}
+
+
+# Pause playback
+function audacious_pause {
+	audtool --playback-pause > /dev/null
+}
+
+
+# Stop playback
+function audacious_stop {
+	audtool --playlist-stop > /dev/null
+}
+
+
+
