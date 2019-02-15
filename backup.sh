@@ -11,7 +11,7 @@
 
 # Debug if anything other than empty
 DEBUG=1
-EXCLUDE=( 'cache/**' '__pycache__/**' '*.pyc' 'abcde.*' )
+EXCLUDE=( 'cache/**' '__pycache__/***' '*.pyc' 'abcde.*' )
 
 if [ ! $# -eq 2 ] && [ ! $# -eq 3 ]; then
 	cat <<-USAGE
@@ -76,7 +76,7 @@ fi
 # h	- Human readable numbers in output
 # i	- Itemize changes; output a change summary
 # v	- Verbose output
-RSYNC_COMMAND='rsync --delete --partial -a -S '
+RSYNC_COMMAND='rsync --delete --delete-excluded --partial -a -S '
 
 if [ DEBUG ]; then
 	RSYNC_COMMAND+='-h -i -v --progress '
