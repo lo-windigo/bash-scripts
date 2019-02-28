@@ -51,19 +51,19 @@ if [ "$INVOCATION" == "vm-console" ]; then
 	FIN
 
 	# Override Ctrl+c and Ctrl+z to prevent killing the VM in horrid ways
+	STTY_SETTINGS="$( stty -g )"
 	stty intr ^]
 	stty susp ^]
 else
 	read -r -d '' SYSTEM <<-'FIN'
 	-boot menu=on
-	-display sdl
+	-display gtk
 	-soundhw ac97
-	-usbdevice tablet
+	-device usb-tablet
 	-device virtio-keyboard-pci
 	-device virtio-gpu-pci
 	FIN
-	# Old options:
-	#-device usb-tablet
+	#-display sdl
 fi
 
 # Fire up the machine that we've created
@@ -73,5 +73,5 @@ qemu-system-x86_64 $BASE_SYSTEM $SYSTEM ${USBDRIVE[@]} ${DRIVE[@]}
 
 # Release the keys we stole for interrupt and suspend
 if [ "$INVOCATION" == "vm-console" ]; then
-	# TODO: Reset those keys, ya jerk
+	stty "$STTY_SETTINGS"
 fi
