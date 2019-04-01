@@ -74,12 +74,13 @@ fi
 # n	- DRY RUN - DEBUG ONLY!
 # fuzzy - Try to look for destination files that are missing (ie: moved)
 # h	- Human readable numbers in output
-# i	- Itemize changes; output a change summary
-# v	- Verbose output
 RSYNC_COMMAND='rsync --delete --delete-excluded --partial -a -S '
 
 if [ DEBUG ]; then
-	RSYNC_COMMAND+='-h -i -v --progress '
+	RSYNC_COMMAND+='-h --itemize-changes '
+
+	# Only output progress if we're running interactively
+	[ -t 1 ] && RSYNC_COMMAND+='--progress '
 fi
 
 RSYNC_COMMAND+="$IGNORE $LINK_DEST ${ARGS[-2]} ${ARGS[-1]}"
