@@ -85,6 +85,8 @@ fi
 
 RSYNC_COMMAND+="$IGNORE $LINK_DEST ${ARGS[-2]} ${ARGS[-1]}"
 
+echo
+echo '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 echo 'Executing command in 5 seconds:'
 echo "$RSYNC_COMMAND"
 sleep 5s
