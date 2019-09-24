@@ -15,3 +15,11 @@ git config --global alias.l 'log --graph --date=short --pretty="format:%Cred%h%C
 git config --global alias.m merge
 git config --global alias.s 'status -s'
 
+
+##
+## Do generic git configurations
+##
+
+# Prune deleted branches from remotes
+git config --global fetch.prune true
+
