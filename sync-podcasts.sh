@@ -34,7 +34,7 @@ function update_longest_file {
 
 # Mount the MTP device in a temporary directory
 mkdir -p "$PHONE_DIR"
-if ! sshfs phone: "$PHONE_DIR"; then
+if ! sshfs -o idmap=user phone: "$PHONE_DIR"; then
 	echo "SSH command failed; please check the connection to the phone."
 	exit 10
 fi
@@ -127,7 +127,8 @@ if [ "$CONFIRMATION" == "y" ]; then
 	for EPISODE in "${NEW_IN_SOURCE[@]}"; do
 		EPISODE_FULL="${SOURCE_DIR}/${EPISODE}"
 		[ -n "$DEBUG" ] && echo "${C_NEW} + ${EPISODE_FULL}${C_RST}"
-		cp -n "$EPISODE_FULL" "${PHONE_PODCAST_DIR}/"
+		#cp -n "$EPISODE_FULL" "${PHONE_PODCAST_DIR}/"
+		scp "$EPISODE_FULL" phone:
 	done
 
 	# Update the sync'd file, unmount the phone, and delete the temp directory
