@@ -34,10 +34,12 @@ done
 #-machine none
 read -r -d '' BASE_SYSTEM <<-'FIN'
 -enable-kvm 
--m 4G 
+-m 6G 
 -cpu host 
 -smp 4 
 -device nec-usb-xhci,id=xhci 
+-object rng-random,id=rng0,filename=/dev/urandom
+-device virtio-rng-pci,rng=rng0
 FIN
 
 # Decide which kind of machine we want
@@ -58,12 +60,14 @@ else
 	read -r -d '' SYSTEM <<-'FIN'
 	-boot menu=on
 	-display gtk
+	-vga std
 	-soundhw ac97
 	-device usb-tablet
 	-device virtio-keyboard-pci
 	-device virtio-gpu-pci
 	FIN
 	#-display sdl
+	#-vga virtio
 fi
 
 # Fire up the machine that we've created
