@@ -4,15 +4,14 @@ SHOW_URI='http://hackerpublicradio.org/local'
 if [ -z "$HPR_FOLDER" ]; then
 	HPR_FOLDER="${HOME}/podcasts/hpr"
 fi
-if [ -z "$SYNC_DIR" ]; then
-	SYNC_DIR="${HOME}/podcasts/sync
+if [ -z "$SYNC_FOLDER" ]; then
+	SYNC_FOLDER="${HOME}/podcasts/sync"
 fi
 
 # Calculate the latest show in the folder
 LATEST=$( \ls "${HPR_FOLDER}/"*.ogg | sort -r | head -n 1 )
 
 if [ -z "$LATEST" ]; then
-
 	echo "Error getting latest HPR episode!"
 	exit 1
 fi
@@ -31,8 +30,11 @@ while [ "$SHOW_NUMBER" -gt 0 ]; do
 
 	# We've found a show that we don't have yet - download it!
 	if [ ! -e "$SHOW_W_PATH" ]; then
-#		echo "Downloading ${SHOW_FILE}"
-#		sleep 6s
+
+		if [ $DEBUG ]; then
+			echo "Downloading ${SHOW_FILE}"
+			sleep 6s
+		fi
 
 		if curl --limit-rate 50K -s "${SHOW_URI}/${SHOW_FILE}" > "$SHOW_W_PATH"; then
 
@@ -41,7 +43,7 @@ while [ "$SHOW_NUMBER" -gt 0 ]; do
 				rm "$MP3_SHOW_FILE" 
 			fi
 
-			ln "$SHOW_W_PATH" "${SYNC_DIR}/${SHOW_FILE}"
+			ln "$SHOW_W_PATH" "${SYNC_FOLDER}/${SHOW_FILE}"
 		else
 			echo "ERROR: Show download failed!"
 			exit 404
