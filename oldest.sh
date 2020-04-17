@@ -17,4 +17,4 @@ if [ ! -d "$1" ]; then
 fi
 
 DIRECTORY="$( dirname "$1" )/$( basename "$1" )"
-find "$DIRECTORY"/* -maxdepth 0 -type d | sort | head -n 1 
+find "$DIRECTORY" -maxdepth 1 -mindepth 1 -type d | sort | head -n 1 
