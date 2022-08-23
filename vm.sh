@@ -4,6 +4,23 @@ DRIVE=( )
 USBDRIVE=( )
 INVOCATION="$( basename "$0" )"
 
+if [ -z "$1" ] || [ "$1" == '-h' ]; then
+	if [ "$INVOCATION" == "vm-console" ]; then
+		DESC='Launch a QEMU/KVM text-based virtual machine'
+	else
+		DESC='Launch a QEMU/KVM graphical virtual machine'
+	fi
+
+	echo
+	echo "${INVOCATION} - ${DESC}"
+	echo
+	echo '-h  Usage / help'
+	echo '-c  CD ROM image/device'
+	echo '-d  Disk image (raw format)'
+	echo '-u  USB drive image'
+	exit
+fi
+	
 
 # Assign anyd drives sent in
 while [ $# -ge 2 ]; do
@@ -29,14 +46,16 @@ while [ $# -ge 2 ]; do
 done
 
 # Set up the base system details
-#-net nic,type=virtio 
+#
 #-machine gfx_passthru=on \
 #-machine none
+#-netdev tap,id=nd0,ifname=tap0
+#-net user
 read -r -d '' BASE_SYSTEM <<-'FIN'
 -enable-kvm 
--m 6G 
+-m 12G 
 -cpu host 
--smp 4 
+-nic user
 -device nec-usb-xhci,id=xhci 
 -object rng-random,id=rng0,filename=/dev/urandom
 -device virtio-rng-pci,rng=rng0
@@ -61,7 +80,7 @@ else
 	-boot menu=on
 	-display gtk
 	-vga std
-	-soundhw ac97
+	-device AC97
 	-device usb-tablet
 	-device virtio-keyboard-pci
 	-device virtio-gpu-pci
