@@ -23,3 +23,5 @@ git config --global alias.s 'status -s'
 # Prune deleted branches from remotes
 git config --global fetch.prune true
 
+# Switch to "main" for the main branch
+git config --global init.defaultBranch main
