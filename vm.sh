@@ -3,6 +3,8 @@
 DRIVE=( )
 USBDRIVE=( )
 INVOCATION="$( basename "$0" )"
+SYS_RAM="$( cat /proc/meminfo | grep MemTotal | xargs | cut -d' ' -f 2 )"
+let 'VM_RAM=SYS_RAM / 2048'
 
 if [ -z "$1" ] || [ "$1" == '-h' ]; then
 	if [ "$INVOCATION" == "vm-console" ]; then
@@ -51,9 +53,9 @@ done
 #-machine none
 #-netdev tap,id=nd0,ifname=tap0
 #-net user
-read -r -d '' BASE_SYSTEM <<-'FIN'
+read -r -d '' BASE_SYSTEM <<-FIN
 -enable-kvm 
--m 12G 
+-m ${VM_RAM}M 
 -cpu host 
 -nic user
 -device nec-usb-xhci,id=xhci 
@@ -79,7 +81,7 @@ else
 	read -r -d '' SYSTEM <<-'FIN'
 	-boot menu=on
 	-display gtk
-	-vga std
+	-vga virtio
 	-device AC97
 	-device usb-tablet
 	-device virtio-keyboard-pci
@@ -87,6 +89,7 @@ else
 	FIN
 	#-display sdl
 	#-vga virtio
+	#-vga std
 fi
 
 # Fire up the machine that we've created
