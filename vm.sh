@@ -4,6 +4,7 @@ DRIVE=( )
 USBDRIVE=( )
 INVOCATION="$( basename "$0" )"
 SYS_RAM="$( cat /proc/meminfo | grep MemTotal | xargs | cut -d' ' -f 2 )"
+SYS_CPU="x86_64"
 let 'VM_RAM=SYS_RAM / 2048'
 
 if [ -z "$1" ] || [ "$1" == '-h' ]; then
@@ -16,16 +17,19 @@ if [ -z "$1" ] || [ "$1" == '-h' ]; then
 	echo
 	echo "${INVOCATION} - ${DESC}"
 	echo
-	echo '-h  Usage / help'
-	echo '-c  CD ROM image/device'
-	echo '-d  Disk image (raw format)'
-	echo '-u  USB drive image'
+	echo '-h   Usage / help'
+	echo '-arm ARM VM'
+	echo '-c   CD ROM image/device'
+	echo '-d   Disk image (raw format)'
+	echo '-u   USB drive image'
 	exit
 fi
 	
 
 # Assign anyd drives sent in
 while [ $# -ge 2 ]; do
+
+	ARGS_TO_SHIFT=2
 
 	# CD images
 	if [ $1 == '-c' ]; then
@@ -38,13 +42,17 @@ while [ $# -ge 2 ]; do
 		#DRIVE+=("-usbdevice disk:format=raw:${2}")
 		DRIVEID="usbdisk${#USBDRIVE[@]}"
 		USBDRIVE+=("-drive if=none,id=${DRIVEID},format=raw,file=${2} -device usb-storage,drive=${DRIVEID}")
+	# ARM emulation
+	elif [ $1 == '-arm' ]; then
+		SYS_CPU='arm -machine musicpal'
+		ARGS_TO_SHIFT=1
 	else
 		echo "Unrecognized option: '${1}'"
 		exit 1
 	fi
 
 	# Skip to the next two arguments
-	shift 2
+	shift $ARGS_TO_SHIFT 
 done
 
 # Set up the base system details
@@ -80,21 +88,21 @@ if [ "$INVOCATION" == "vm-console" ]; then
 else
 	read -r -d '' SYSTEM <<-'FIN'
 	-boot menu=on
-	-display gtk
+	-display gtk,gl=on
 	-vga virtio
 	-device AC97
 	-device usb-tablet
 	-device virtio-keyboard-pci
-	-device virtio-gpu-pci
 	FIN
 	#-display sdl
 	#-vga virtio
 	#-vga std
+	#-device virtio-gpu-pci
 fi
 
 # Fire up the machine that we've created
 set -o xtrace
-qemu-system-x86_64 $BASE_SYSTEM $SYSTEM ${USBDRIVE[@]} ${DRIVE[@]}
+qemu-system-$SYS_CPU $BASE_SYSTEM $SYSTEM ${USBDRIVE[@]} ${DRIVE[@]}
 
 
 # Release the keys we stole for interrupt and suspend

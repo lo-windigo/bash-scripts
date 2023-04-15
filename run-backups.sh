@@ -2,9 +2,10 @@
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 #                                                 #
-# Backup Atlas                                    #
+# Windigo's Backup Kludge                         #
 #                                                 #
-# Incrementally back up directories on the server #
+# A terrible set of functions flexible enough to  #
+# manage most bad backup strategies               #
 #                                                 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 
@@ -13,7 +14,6 @@
 DEBUG="${DEBUG:-1}"
 SUMMARY="${SUMMARY:-1}"
 BACKUP_SOURCES="${BACKUP_SOURCES:-/etc/backup-sources.d}"
-
 
 
 # WARNING:
