@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
+CONSOLE_CMD='vm_console'
 DRIVE=( )
 USBDRIVE=( )
 INVOCATION="$( basename "$0" )"
 SYS_RAM="$( cat /proc/meminfo | grep MemTotal | xargs | cut -d' ' -f 2 )"
 SYS_CPU="x86_64"
+
 let 'VM_RAM=SYS_RAM / 2048'
 
 if [ -z "$1" ] || [ "$1" == '-h' ]; then
-	if [ "$INVOCATION" == "vm-console" ]; then
+	if [ "$INVOCATION" == "$CONSOLE_CMD" ]; then
 		DESC='Launch a QEMU/KVM text-based virtual machine'
 	else
 		DESC='Launch a QEMU/KVM graphical virtual machine'
@@ -65,6 +67,7 @@ read -r -d '' BASE_SYSTEM <<-FIN
 -enable-kvm 
 -m ${VM_RAM}M 
 -cpu host 
+-smp 4
 -nic user
 -device nec-usb-xhci,id=xhci 
 -object rng-random,id=rng0,filename=/dev/urandom
@@ -72,7 +75,7 @@ read -r -d '' BASE_SYSTEM <<-FIN
 FIN
 
 # Decide which kind of machine we want
-if [ "$INVOCATION" == "vm-console" ]; then
+if [ "$INVOCATION" == "$CONSOLE_CMD" ]; then
 
 	# Set options for a console-only virtual machine, using the host terminal
 	read -r -d '' SYSTEM <<-'FIN'
@@ -86,26 +89,47 @@ if [ "$INVOCATION" == "vm-console" ]; then
 	stty intr ^]
 	stty susp ^]
 else
-	read -r -d '' SYSTEM <<-'FIN'
+	#VM_SPICE_SOCKET=$( mktemp -t vm_XXXXXX.spice )
+
+	read -r -d '' SYSTEM <<-FIN
 	-boot menu=on
-	-display gtk,gl=on
-	-vga virtio
-	-device AC97
 	-device usb-tablet
+	-device AC97
 	-device virtio-keyboard-pci
+	-display gtk,gl=off
+	-vga virtio
 	FIN
-	#-display sdl
-	#-vga virtio
-	#-vga std
 	#-device virtio-gpu-pci
+	#-display gtk,gl=on  # Terrible performance?
+	#-vga std # Debian
+	#-vga virtio
+	#-display gtk # Debian
+	#-display sdl,gl=on # Terrible performance
+	#-display sdl
+	#-spice addr=$VM_SPICE_SOCKET,disable-ticketing=on,unix=on # Ubuntu: good
+	#performance, no boot display
 fi
 
 # Fire up the machine that we've created
 set -o xtrace
-qemu-system-$SYS_CPU $BASE_SYSTEM $SYSTEM ${USBDRIVE[@]} ${DRIVE[@]}
+if [ "$INVOCATION" == "$CONSOLE_CMD" ]; then
+	qemu-system-$SYS_CPU $BASE_SYSTEM $SYSTEM ${USBDRIVE[@]} ${DRIVE[@]}
+else
+	qemu-system-$SYS_CPU $BASE_SYSTEM $SYSTEM ${USBDRIVE[@]} ${DRIVE[@]}
+	#set +o xtrace
 
+	#VM_PID=$!
+
+	#echo 'Connecting to spice server with spicy...'
+	#sleep 2s
+	#spicy --uri="spice+unix://$VM_SPICE_SOCKET"
+fi
+
+if [ -e "$VM_SPICE_SOCKET" ]; then
+	rm "$VM_SPICE_SOCKET"
+fi
 
 # Release the keys we stole for interrupt and suspend
-if [ "$INVOCATION" == "vm-console" ]; then
+if [ "$INVOCATION" == "$CONSOLE_CMD" ]; then
 	stty "$STTY_SETTINGS"
 fi
