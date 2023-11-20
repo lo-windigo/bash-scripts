@@ -10,7 +10,7 @@ else
 	TODO_COLOR_FLAG=p
 fi
 
-TODO_ARGS=" -${TODO_COLOR_FLAG}tNd ${HOME}/.config/todo.sh/todo.cfg"
+TODO_ARGS=" -${TODO_COLOR_FLAG}tN"
 
 cd $HOME/opt/todo.txt-cli
 
