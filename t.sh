@@ -17,12 +17,13 @@ fi
 
 TODO_ARGS=" -${TODO_COLOR_FLAG}tN"
 
-if [ "$#" -eq 0 ]; then
-	todo.sh $TODO_ARGS ls	
-elif [ "$1" == "ls" ]; then
+# If we have arguments, we should probably run them
+if [ "$#" -ne 0 ]; then
 	todo.sh $TODO_ARGS $@	
-else
-	todo.sh $TODO_ARGS $@	
+fi
+
+# If we haven't been called with a list-y command, we should list todo items
+if [ "$1" != "ls" ] && [ "${1:0:4}" != 'list' ]; then
 	todo.sh $TODO_ARGS ls	
 fi
 
