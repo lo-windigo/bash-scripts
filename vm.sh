@@ -93,13 +93,15 @@ else
 
 	read -r -d '' SYSTEM <<-FIN
 	-boot menu=on
+	-device intel-hda
+	-device hda-duplex
 	-device usb-tablet
-	-device AC97
 	-device virtio-keyboard-pci
 	-display gtk,gl=off
 	-vga virtio
 	FIN
 	#-device virtio-gpu-pci
+	#-device AC97
 	#-display gtk,gl=on  # Terrible performance?
 	#-vga std # Debian
 	#-vga virtio
@@ -108,6 +110,7 @@ else
 	#-display sdl
 	#-spice addr=$VM_SPICE_SOCKET,disable-ticketing=on,unix=on # Ubuntu: good
 	#performance, no boot display
+	#--soundhw hda # Deprecated
 fi
 
 # Fire up the machine that we've created
