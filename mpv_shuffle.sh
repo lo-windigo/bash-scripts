@@ -6,6 +6,9 @@ OLD_IFS="$IFS"
 IFS=$'\n'
 MUSIC_DIR=~/Music
 
+## Ctrl+C should quit
+trap 'exit' SIGINT
+
 if [ ! -z "$1" ]; then
 	MUSIC_DIR="$1"
 fi
