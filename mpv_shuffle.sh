@@ -48,6 +48,5 @@ while true; do
 	mpv --no-video --msg-level=all=no,statusline=status,term-msg=status \
 		"$CURRENTLY_PLAYING"
 	echo 
-	sleep .1s
 done
 
