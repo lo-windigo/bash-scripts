@@ -2,7 +2,7 @@
 # Get a weather forecast for our local area
 ##
 
-ZIP="${1:-93955}"
+ZIP="${1:-95039+US}"
 
 # Set up the request URL. See wttr.in/:help for more.
 # Flags:
