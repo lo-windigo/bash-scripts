@@ -26,7 +26,7 @@ if [ -z "$1" ] || [ "$1" == '-h' ]; then
 	echo '-u   USB drive image'
 	exit
 fi
-	
+
 
 # Assign anyd drives sent in
 while [ $# -ge 2 ]; do
@@ -36,6 +36,9 @@ while [ $# -ge 2 ]; do
 	# CD images
 	if [ $1 == '-c' ]; then
 		DRIVE+=("-cdrom ${2}")
+	# Floppy images
+	elif [ $1 == '-f' ]; then
+		DRIVE+=("-fda ${2}")
 	# Disk drives
 	elif [ $1 == '-d' ]; then
 		DRIVE+=("-drive file=${2},format=raw")
@@ -44,6 +47,11 @@ while [ $# -ge 2 ]; do
 		#DRIVE+=("-usbdevice disk:format=raw:${2}")
 		DRIVEID="usbdisk${#USBDRIVE[@]}"
 		USBDRIVE+=("-drive if=none,id=${DRIVEID},format=raw,file=${2} -device usb-storage,drive=${DRIVEID}")
+	# x86 emulation
+	elif [ $1 == '-x86' ]; then
+		SYS_CPU='i386'
+		VM_RAM='2048' # Ehh, that aughta be good
+		ARGS_TO_SHIFT=1
 	# ARM emulation
 	elif [ $1 == '-arm' ]; then
 		SYS_CPU='arm -machine musicpal'
