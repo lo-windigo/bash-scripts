@@ -1,32 +1,29 @@
 #!/usr/bin/env bash
 
-# Format for the "currently playing" line
-FMT='General;%Title%, by %Artist% on %Album%'
-OLD_IFS="$IFS"
-IFS=$'\n'
-MUSIC_DIR=~/Music
+# Configurations
+MUSIC_DIR="$HOME/Music"
+NUM_SONGS=1000
 
-## Ctrl+C should quit
-trap 'exit' SIGINT
-
+# Allow user to override the music directory
 if [ ! -z "$1" ]; then
 	MUSIC_DIR="$1"
 fi
 
-# Fix the internal field separator before we go
+# Switch the internal field separator, and fix when we exit
+OLD_IFS="$IFS"
+IFS=$'\n'
 function fix_ifs {
 	IFS="$OLD_IFS"
 }
-
 trap 'fix_ifs' EXIT
 
-find "$MUSIC_DIR" -type f \( -iname '*.ogg' -o -iname '*.flac' -o -iname '*.mp3' \
-	-o -iname '*.wma' \) | head -n 1000 | sort -R | \
-	while read CURRENTLY_PLAYING; do
-	mediainfo --Inform="$FMT" "$CURRENTLY_PLAYING"
-	echo "$CURRENTLY_PLAYING"
-	mpv --no-video --msg-level=all=no,statusline=status,term-msg=status \
-		"$CURRENTLY_PLAYING"
-	echo 
-done
+# Function to generate a M3U playlist of NUM_SONGS random songs
+function playlist {
+	find "$MUSIC_DIR" -type f -iregex '.*.\(ogg\|flac\|mp3\|oga\|\wma\)' \
+		| sort -R \
+		| tail -n $NUM_SONGS
+}
+
+#--msg-level=all=info,statusline=status,term-msg=status \
+mpv --no-video --playlist=<( playlist )
 
