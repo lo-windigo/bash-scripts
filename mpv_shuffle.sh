@@ -13,36 +13,16 @@ if [ ! -z "$1" ]; then
 	MUSIC_DIR="$1"
 fi
 
+# Fix the internal field separator before we go
 function fix_ifs {
 	IFS="$OLD_IFS"
 }
 
-# Ensure a non-image random song
-function random_song {
-	local CURRENTLY_PLAYING
+trap 'fix_ifs' EXIT
 
-	while [ -z "$CURRENTLY_PLAYING" ]; do
-		CURRENTLY_PLAYING="$( random_file "$MUSIC_DIR" )"
-
-		case $CURRENTLY_PLAYING in
-			*.ogg|*.flac|*.mp3|*.wma)
-				# File is in accepted types - do not reset CURRENTLY_PLAYING
-				;;
-			*)
-				# Unrecognized file type - skip
-				CURRENTLY_PLAYING=
-				;;
-		esac
-	done
-
-	echo $CURRENTLY_PLAYING	
-}
-
-trap fix_ifs EXIT
-
-while true; do
-	CURRENTLY_PLAYING="$( random_song )"
-
+find "$MUSIC_DIR" -type f \( -iname '*.ogg' -o -iname '*.flac' -o -iname '*.mp3' \
+	-o -iname '*.wma' \) | head -n 1000 | sort -R | \
+	while read CURRENTLY_PLAYING; do
 	mediainfo --Inform="$FMT" "$CURRENTLY_PLAYING"
 	echo "$CURRENTLY_PLAYING"
 	mpv --no-video --msg-level=all=no,statusline=status,term-msg=status \
