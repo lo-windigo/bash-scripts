@@ -29,6 +29,8 @@ eval "$AUTHORIZED_KEYS_CP_CMD"
 echo " - Create the new authorized keys file"
 cat "$SSH_KEY_DIR/"* > "$AUTHORIZED_KEYS"
 
+echo 
+
 while read -u 7 HOST_TO_UPDATE; do
 
 	echo "Remote $HOST_TO_UPDATE:"
@@ -40,8 +42,8 @@ while read -u 7 HOST_TO_UPDATE; do
 		echo "Failed"
 	fi
 
-	echo -n " - Copying new file to host"
-	if scp "$AUTHORIZED_KEYS" "${HOST_TO_UPDATE}:.ssh/" 2>/dev/null; then
+	echo -n " - Copying new file to host: "
+	if scp -q "$AUTHORIZED_KEYS" "${HOST_TO_UPDATE}:.ssh/" 2>/dev/null; then
 		echo "Successful"
 	else
 		echo "Failed"
