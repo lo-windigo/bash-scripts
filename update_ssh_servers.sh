@@ -21,24 +21,27 @@ fi
 
 # Make sure to copy the original file as a backup
 AUTHORIZED_KEYS_CP_CMD="cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys.old"
+
+echo "Local system:"
+echo " - Backing up local authorized_keys file"
 eval "$AUTHORIZED_KEYS_CP_CMD"
 
-# Create the new authorized keys file
+echo " - Create the new authorized keys file"
 cat "$SSH_KEY_DIR/"* > "$AUTHORIZED_KEYS"
 
 while read -u 7 HOST_TO_UPDATE; do
 
-	echo "Updating authorized_keys for $HOST_TO_UPDATE"
+	echo "Remote $HOST_TO_UPDATE:"
 
 	echo -n " - Backing up previous authorized_keys file: "
-	if ssh $HOST_TO_UPDATE "$AUTHORIZED_KEYS_CP_CMD" > /dev/null; then
+	if ssh $HOST_TO_UPDATE "$AUTHORIZED_KEYS_CP_CMD" 2>/dev/null; then
 		echo "Successful"
 	else
 		echo "Failed"
 	fi
 
 	echo -n " - Copying new file to host"
-	if scp "$AUTHORIZED_KEYS" "${HOST_TO_UPDATE}:.ssh/" > /dev/null; then
+	if scp "$AUTHORIZED_KEYS" "${HOST_TO_UPDATE}:.ssh/" 2>/dev/null; then
 		echo "Successful"
 	else
 		echo "Failed"
@@ -46,4 +49,6 @@ while read -u 7 HOST_TO_UPDATE; do
 
 	echo
 done 7< "$SSH_HOSTS"
+
+echo "Updates complete"
 
