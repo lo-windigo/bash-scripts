@@ -9,7 +9,7 @@ fi
 RANDOM_ROOT_REAL="$( realpath "$RANDOM_ROOT" )"
 
 if [ ! -d "$RANDOM_ROOT_REAL" ]; then
-	echo "Path specified is not a directory: $1"
+	echo "Path specified is not a directory: $1" 1>&2
 	exit 9
 fi
 
